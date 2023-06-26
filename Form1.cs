@@ -12,6 +12,7 @@ namespace DimGlow
         public Form1()
         {
             InitializeComponent();
+
             // Initialize the overlay form
             overlayForm = new OverlayForm
             {
