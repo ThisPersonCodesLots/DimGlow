@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace DimGlow
 {
@@ -25,7 +27,8 @@ namespace DimGlow
             //
             trackBar1.Minimum = 0;
             trackBar1.Maximum = 95;
-            trackBar1.Value = Properties.Settings.Default.Transparency;
+            // User_Setting (value = 0 by default) is the value saved in user settings from the previous session before closing the app
+            trackBar1.Value = Properties.Settings.Default.User_Setting;
             trackBar1.TickFrequency = 10;
             trackBar1.LargeChange = 10;
             trackBar1.SmallChange = 1;
@@ -42,7 +45,13 @@ namespace DimGlow
             this.Icon = new Icon("images\\icon.ico");
             ApplyDarkOverlay(trackBar1.Value);
 
+            // Load settings from the file if it exists
+            if (System.IO.File.Exists("config.xml"))
+            {
+                LoadConfiguration();
+            }
         }
+
         private void ApplyDarkOverlay(int transparency)
         {
             // Set overlay form opacity based on transparency
@@ -61,9 +70,45 @@ namespace DimGlow
 
         private void button2_Click(object sender, EventArgs e)
         {
+            SaveConfiguration();
+        }
 
-            Properties.Settings.Default.Transparency = trackBar1.Value;
+        private void SaveConfiguration()
+        {
+            // Save the trackbar value to user settings
+            Properties.Settings.Default.User_Setting = trackBar1.Value;
             Properties.Settings.Default.Save();
+
+            // Save the settings to a file
+            SaveConfigurationToFile();
+        }
+
+        private void SaveConfigurationToFile()
+        {
+            var serializer = new XmlSerializer(typeof(UserSettings));
+
+            using (var writer = new StreamWriter("config.xml"))
+            {
+                var userSettings = new UserSettings
+                {
+                    UserSetting = trackBar1.Value
+                };
+
+                serializer.Serialize(writer, userSettings);
+            }
+        }
+
+        private void LoadConfiguration()
+        {
+            var serializer = new XmlSerializer(typeof(UserSettings));
+
+            using (var reader = new StreamReader("config.xml"))
+            {
+                var userSettings = (UserSettings)serializer.Deserialize(reader);
+                trackBar1.Value = userSettings.UserSetting;
+                textBox1.Text = trackBar1.Value.ToString();
+                ApplyDarkOverlay(trackBar1.Value);
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -113,7 +158,40 @@ namespace DimGlow
             notifyIcon.Visible = false;
         }
 
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                // Enable dark mode
+                EnableDarkMode();
+            }
+            else
+            {
+                // Disable dark mode
+                DisableDarkMode();
+            }
+        }
+
+        private void EnableDarkMode()
+        {
+            // Change the color properties of your form and controls to reflect the dark mode
+            this.BackColor = Color.FromArgb(64, 64, 64);
+            // Modify other controls as needed
+        }
+
+        private void DisableDarkMode()
+        {
+            // Restore the original color properties of your form and controls
+            this.BackColor = SystemColors.Control;
+            // Restore other controls as needed
+        }
     }
+
+    public class UserSettings
+    {
+        public int UserSetting { get; set; }
+    }
+
     public class OverlayForm : Form
     {
         private const int WS_EX_TRANSPARENT = 0x20;

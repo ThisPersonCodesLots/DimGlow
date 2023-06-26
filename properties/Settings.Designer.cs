@@ -27,6 +27,9 @@ namespace DimGlow.Properties
             }
         }
 
+        public bool DarkMode = false;
+
         public int Transparency = 0;
+        public int User_Setting = 0;
     }
 }
