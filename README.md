@@ -12,6 +12,12 @@
 
 - The source code is available in the repository. If you don't want to build the application yourself, you can download the executable file from the releases page.
 
+### TODO:
+- [	] Solve the issue with the application triggering Windows Defender SmartScreen.
+- [ ] Solve the issue with "Dark Mode" checkbox to remain saved when the application is closed.
+- [ ] Add a "Start with Windows" checkbox.
+- [ ] Multi-minitor support.
+
 ### Image
 	- Normal mode
 ![alt-text](https://i.imgur.com/s7w9dZV.png)
