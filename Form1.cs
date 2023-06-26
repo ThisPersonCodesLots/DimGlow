@@ -43,12 +43,24 @@ namespace DimGlow
             //
             this.ShowInTaskbar = true;
             this.Icon = new Icon("images\\icon.ico");
-            ApplyDarkOverlay(trackBar1.Value);
 
             // Load settings from the file if it exists
             if (System.IO.File.Exists("config.xml"))
             {
                 LoadConfiguration();
+            }
+
+            // Load DarkMode checkbox state from settings
+            checkBox1.Checked = Properties.Settings.Default.DarkMode;
+
+            // Enable or disable dark mode based on checkbox state
+            if (checkBox1.Checked)
+            {
+                EnableDarkMode();
+            }
+            else
+            {
+                DisableDarkMode();
             }
         }
 
@@ -77,6 +89,10 @@ namespace DimGlow
         {
             // Save the trackbar value to user settings
             Properties.Settings.Default.User_Setting = trackBar1.Value;
+
+            // Save the DarkMode checkbox state to user settings
+            Properties.Settings.Default.DarkMode = checkBox1.Checked;
+
             Properties.Settings.Default.Save();
 
             // Save the settings to a file
@@ -91,7 +107,8 @@ namespace DimGlow
             {
                 var userSettings = new UserSettings
                 {
-                    UserSetting = trackBar1.Value
+                    UserSetting = trackBar1.Value,
+                    DarkMode = checkBox1.Checked
                 };
 
                 serializer.Serialize(writer, userSettings);
@@ -108,6 +125,7 @@ namespace DimGlow
                 trackBar1.Value = userSettings.UserSetting;
                 textBox1.Text = trackBar1.Value.ToString();
                 ApplyDarkOverlay(trackBar1.Value);
+                checkBox1.Checked = userSettings.DarkMode;
             }
         }
 
@@ -190,6 +208,7 @@ namespace DimGlow
     public class UserSettings
     {
         public int UserSetting { get; set; }
+        public bool DarkMode { get; set; }
     }
 
     public class OverlayForm : Form
