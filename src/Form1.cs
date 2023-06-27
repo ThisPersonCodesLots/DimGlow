@@ -98,7 +98,7 @@ namespace DimGlow
             var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
             using (var reader = new StreamReader("config.xml"))
             {
-                var userSettings = (UserSettings)serializer.Deserialize(reader);
+                var userSettings = (UserSettings)serializer.Deserialize(reader)!;
                 trackBar1.Value = userSettings.UserSetting;
                 textBox1.Text = trackBar1.Value.ToString();
                 ApplyDarkOverlay(trackBar1.Value);
@@ -117,7 +117,7 @@ namespace DimGlow
             this.Hide();
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void textBox1_TextChanged(object? sender, EventArgs e)
         {
             if (int.TryParse(textBox1.Text, out int value))
             {
@@ -135,7 +135,7 @@ namespace DimGlow
             }
         }
 
-        private void trackBar1_Scroll(object sender, EventArgs e)
+        private void trackBar1_Scroll(object? sender, EventArgs e)
         {
             if (sender == null) return;
             int transparency = trackBar1.Value;
@@ -143,7 +143,7 @@ namespace DimGlow
             textBox1.Text = trackBar1.Value.ToString();
         }
 
-        void notifyIcon_DoubleClick(object sender, EventArgs e)
+        void notifyIcon_DoubleClick(object? sender, EventArgs e)
         {
             notifyIcon = new NotifyIcon();
             this.Show();
