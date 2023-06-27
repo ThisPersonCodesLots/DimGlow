@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -6,17 +8,36 @@ namespace DimGlow
 {
     public partial class Form1 : Form
     {
-        private OverlayForm overlayForm;
+        private OverlayForm[] overlayForms;
         private NotifyIcon? notifyIcon;
+        private Dictionary<CheckBox, int> monitorDictionary;
 
         public Form1()
         {
             InitializeComponent();
 
-            overlayForm = new OverlayForm
+            int monitorCount = Screen.AllScreens.Length;
+            overlayForms = new OverlayForm[monitorCount];
+            monitorDictionary = new Dictionary<CheckBox, int>();
+
+            for (int i = 0; i < monitorCount; i++)
             {
-                Visible = false
-            };
+                var checkBox = new CheckBox
+                {
+                    Text = $"Monitor {i + 1}",
+                    AutoSize = true,
+                    Location = new Point(10, 50 + (i * 30))
+                };
+                checkBox.CheckedChanged += MonitorCheckBox_CheckedChanged;
+                monitorDictionary.Add(checkBox, i);
+                panel1.Controls.Add(checkBox);
+
+                overlayForms[i] = new OverlayForm
+                {
+                    Visible = false,
+                    Bounds = Screen.AllScreens[i].Bounds
+                };
+            }
 
             Text = "DimGlow";
 
@@ -32,7 +53,7 @@ namespace DimGlow
             textBox1.TextChanged += textBox1_TextChanged;
 
             this.ShowInTaskbar = true;
-            this.Icon = new System.Drawing.Icon("images\\icon.ico");
+            this.Icon = new Icon("images\\icon.ico");
 
             if (File.Exists("config.xml"))
             {
@@ -51,18 +72,50 @@ namespace DimGlow
             }
         }
 
+        private void MonitorCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = (CheckBox)sender;
+            int monitorIndex = monitorDictionary[checkBox];
+
+            if (checkBox.Checked)
+            {
+                overlayForms[monitorIndex].Visible = true;
+            }
+            else
+            {
+                overlayForms[monitorIndex].Visible = false;
+            }
+        }
+
         private void ApplyDarkOverlay(int transparency)
         {
-            overlayForm.Opacity = transparency / 100.0;
-            overlayForm.Visible = true;
+            foreach (OverlayForm overlayForm in overlayForms)
+            {
+                int monitorIndex = Array.IndexOf(overlayForms, overlayForm);
+                CheckBox checkBox = monitorDictionary.FirstOrDefault(x => x.Value == monitorIndex).Key;
+
+                if (checkBox != null && checkBox.Checked)
+                {
+                    overlayForm.Opacity = transparency / 100.0;
+                    overlayForm.Visible = true;
+                }
+                else
+                {
+                    overlayForm.Visible = false;
+                }
+            }
         }
+
 
         private void button1_Click(object sender, EventArgs e)
         {
             if (sender == null) return;
             trackBar1.Value = trackBar1.Minimum;
             textBox1.Text = trackBar1.Value.ToString();
-            overlayForm.Visible = false;
+            foreach (OverlayForm overlayForm in overlayForms)
+            {
+                overlayForm.Visible = false;
+            }
             ApplyDarkOverlay(trackBar1.Value);
         }
 
@@ -110,14 +163,14 @@ namespace DimGlow
         {
             notifyIcon = new NotifyIcon();
             notifyIcon.Text = "DimGlow";
-            notifyIcon.Icon = new System.Drawing.Icon("images\\icon.ico");
+            notifyIcon.Icon = new Icon("images\\icon.ico");
             notifyIcon.Visible = true;
             notifyIcon.DoubleClick += notifyIcon_DoubleClick;
             this.ShowInTaskbar = false;
             this.Hide();
         }
 
-        private void textBox1_TextChanged(object? sender, EventArgs e)
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
             if (int.TryParse(textBox1.Text, out int value))
             {
@@ -135,7 +188,7 @@ namespace DimGlow
             }
         }
 
-        private void trackBar1_Scroll(object? sender, EventArgs e)
+        private void trackBar1_Scroll(object sender, EventArgs e)
         {
             if (sender == null) return;
             int transparency = trackBar1.Value;
@@ -143,7 +196,7 @@ namespace DimGlow
             textBox1.Text = trackBar1.Value.ToString();
         }
 
-        void notifyIcon_DoubleClick(object? sender, EventArgs e)
+        void notifyIcon_DoubleClick(object sender, EventArgs e)
         {
             notifyIcon = new NotifyIcon();
             this.Show();
@@ -166,12 +219,17 @@ namespace DimGlow
 
         private void EnableDarkMode()
         {
-            this.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
+            this.BackColor = Color.FromArgb(64, 64, 64);
         }
 
         private void DisableDarkMode()
         {
             this.BackColor = SystemColors.Control;
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 
@@ -191,13 +249,11 @@ namespace DimGlow
             InitializeComponent();
 
             this.FormBorderStyle = FormBorderStyle.None;
-            this.WindowState = FormWindowState.Maximized;
             this.TopMost = true;
             this.DoubleBuffered = true;
             this.BackColor = Color.Black;
             this.ShowInTaskbar = false;
             this.Opacity = 0.1;
-            this.StartPosition = FormStartPosition.CenterScreen;
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
@@ -218,9 +274,9 @@ namespace DimGlow
         private void InitializeComponent()
         {
             this.SuspendLayout();
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.AutoScaleDimensions = new SizeF(6F, 13F);
+            this.AutoScaleMode = AutoScaleMode.Font;
+            this.ClientSize = new Size(284, 261);
             this.Name = "OverlayForm";
             this.Text = "OverlayForm";
             this.ResumeLayout(false);

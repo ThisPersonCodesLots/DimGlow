@@ -36,15 +36,15 @@
             notifyIcon1 = new NotifyIcon(components);
             textBox1 = new TextBox();
             checkBox1 = new CheckBox();
+            panel1 = new Panel();
             ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
             SuspendLayout();
             // 
             // button1
             // 
-            button1.Location = new Point(93, 233);
-            button1.Margin = new Padding(2);
+            button1.Location = new Point(140, 350);
             button1.Name = "button1";
-            button1.Size = new Size(80, 33);
+            button1.Size = new Size(120, 50);
             button1.TabIndex = 0;
             button1.Text = "Reset";
             button1.UseVisualStyleBackColor = true;
@@ -52,10 +52,9 @@
             // 
             // button2
             // 
-            button2.Location = new Point(213, 233);
-            button2.Margin = new Padding(2);
+            button2.Location = new Point(320, 350);
             button2.Name = "button2";
-            button2.Size = new Size(80, 33);
+            button2.Size = new Size(120, 50);
             button2.TabIndex = 1;
             button2.Text = "Apply";
             button2.UseVisualStyleBackColor = true;
@@ -63,10 +62,9 @@
             // 
             // button3
             // 
-            button3.Location = new Point(333, 233);
-            button3.Margin = new Padding(2);
+            button3.Location = new Point(500, 350);
             button3.Name = "button3";
-            button3.Size = new Size(80, 33);
+            button3.Size = new Size(120, 50);
             button3.TabIndex = 2;
             button3.Text = "Icon Tray";
             button3.UseVisualStyleBackColor = true;
@@ -74,10 +72,9 @@
             // 
             // trackBar1
             // 
-            trackBar1.Location = new Point(163, 135);
-            trackBar1.Margin = new Padding(2);
+            trackBar1.Location = new Point(244, 202);
             trackBar1.Name = "trackBar1";
-            trackBar1.Size = new Size(199, 56);
+            trackBar1.Size = new Size(298, 80);
             trackBar1.TabIndex = 3;
             trackBar1.Scroll += trackBar1_Scroll;
             // 
@@ -89,36 +86,44 @@
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(208, 193);
-            textBox1.Margin = new Padding(2);
+            textBox1.Location = new Point(312, 290);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(118, 27);
+            textBox1.Size = new Size(175, 35);
             textBox1.TabIndex = 4;
             textBox1.TextChanged += textBox1_TextChanged;
             // 
             // checkBox1
             // 
             checkBox1.AutoSize = true;
-            checkBox1.Location = new Point(396, 138);
+            checkBox1.Location = new Point(594, 207);
+            checkBox1.Margin = new Padding(4);
             checkBox1.Name = "checkBox1";
-            checkBox1.Size = new Size(105, 24);
+            checkBox1.Size = new Size(142, 34);
             checkBox1.TabIndex = 5;
             checkBox1.Text = "Dark Mode";
             checkBox1.UseVisualStyleBackColor = true;
             checkBox1.CheckedChanged += checkBox1_CheckedChanged;
             // 
+            // panel1
+            // 
+            panel1.Location = new Point(579, 12);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(247, 147);
+            panel1.TabIndex = 6;
+            panel1.Paint += panel1_Paint;
+            // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(12F, 30F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(533, 300);
+            ClientSize = new Size(800, 450);
+            Controls.Add(panel1);
             Controls.Add(checkBox1);
             Controls.Add(textBox1);
             Controls.Add(trackBar1);
             Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(button1);
-            Margin = new Padding(2);
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "DimGlow";
@@ -141,5 +146,6 @@
         private NotifyIcon notifyIcon1;
         private TextBox textBox1;
         private CheckBox checkBox1;
+        private Panel panel1;
     }
 }
