@@ -36,7 +36,6 @@
             notifyIcon1 = new NotifyIcon(components);
             textBox1 = new TextBox();
             checkBox1 = new CheckBox();
-            panel1 = new Panel();
             ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
             SuspendLayout();
             // 
@@ -56,7 +55,7 @@
             button2.Name = "button2";
             button2.Size = new Size(120, 50);
             button2.TabIndex = 1;
-            button2.Text = "Apply";
+            button2.Text = "Save";
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
             // 
@@ -72,17 +71,21 @@
             // 
             // trackBar1
             // 
+            trackBar1.LargeChange = 10;
             trackBar1.Location = new Point(244, 202);
+            trackBar1.Maximum = 95;
             trackBar1.Name = "trackBar1";
             trackBar1.Size = new Size(298, 80);
             trackBar1.TabIndex = 3;
+            trackBar1.TickFrequency = 10;
             trackBar1.Scroll += trackBar1_Scroll;
             // 
             // notifyIcon1
             // 
-            notifyIcon1.Text = "notifyIcon1";
+            notifyIcon1.Text = "DimGlow";
             notifyIcon1.Visible = true;
-            notifyIcon1.MouseDoubleClick += notifyIcon1_MouseDoubleClick;
+            notifyIcon1.Icon = new System.Drawing.Icon("images\\icon.ico");
+
             // 
             // textBox1
             // 
@@ -104,20 +107,11 @@
             checkBox1.UseVisualStyleBackColor = true;
             checkBox1.CheckedChanged += checkBox1_CheckedChanged;
             // 
-            // panel1
-            // 
-            panel1.Location = new Point(579, 12);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(247, 147);
-            panel1.TabIndex = 6;
-            panel1.Paint += panel1_Paint;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(12F, 30F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(panel1);
             Controls.Add(checkBox1);
             Controls.Add(textBox1);
             Controls.Add(trackBar1);
@@ -132,11 +126,6 @@
             PerformLayout();
         }
 
-        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion
 
         private Button button1;
@@ -146,6 +135,5 @@
         private NotifyIcon notifyIcon1;
         private TextBox textBox1;
         private CheckBox checkBox1;
-        private Panel panel1;
     }
 }
