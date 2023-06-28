@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -10,18 +11,14 @@ namespace DimGlow
         public Form1()
         {
             InitializeComponent();
-
-            overlayForm = new OverlayForm
-            {
-                Visible = false
-            };
+            InitializeOverlayForm();
 
             Text = "DimGlow";
 
             textBox1.Text = trackBar1.Value.ToString();
             textBox1.TextChanged += textBox1_TextChanged;
 
-            this.ShowInTaskbar = true;
+            ShowInTaskbar = true;
             notifyIcon1.Icon = new System.Drawing.Icon("images\\icon.ico");
 
             if (File.Exists("config.xml"))
@@ -31,14 +28,15 @@ namespace DimGlow
 
             checkBox1.Checked = Properties.Settings.Default.DarkMode;
 
-            if (checkBox1.Checked)
+            UpdateDarkMode();
+        }
+
+        private void InitializeOverlayForm()
+        {
+            overlayForm = new OverlayForm
             {
-                EnableDarkMode();
-            }
-            else
-            {
-                DisableDarkMode();
-            }
+                Visible = false
+            };
         }
 
         private void ApplyDarkOverlay(int transparency)
@@ -51,7 +49,11 @@ namespace DimGlow
         //
         private void button1_Click(object sender, EventArgs e)
         {
-            if (sender == null) return;
+            ResetForm();
+        }
+
+        private void ResetForm()
+        {
             trackBar1.Value = trackBar1.Minimum;
             textBox1.Text = trackBar1.Value.ToString();
             overlayForm.Visible = false;
@@ -97,12 +99,18 @@ namespace DimGlow
                 textBox1.Text = trackBar1.Value.ToString();
                 ApplyDarkOverlay(trackBar1.Value);
                 checkBox1.Checked = userSettings.DarkMode;
+                // UpdateDarkMode(); // Update the dark mode immediately after loading the configuration
             }
         }
         //
         // Icon Tray button
         //
         private void button3_Click(object sender, EventArgs e)
+        {
+            MinimizeToTray();
+        }
+
+        private void MinimizeToTray()
         {
             notifyIcon1.Visible = true;
             notifyIcon1.DoubleClick += notifyIcon_DoubleClick;
@@ -111,6 +119,11 @@ namespace DimGlow
         }
 
         void notifyIcon_DoubleClick(object? sender, EventArgs e)
+        {
+            RestoreFromTray();
+        }
+
+        private void RestoreFromTray()
         {
             this.Show();
             this.WindowState = FormWindowState.Normal;
@@ -122,25 +135,39 @@ namespace DimGlow
         //
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
+            UpdateDarkMode();
+            // SaveDarkModeToConfig();
+        }
+
+        private void UpdateDarkMode()
+        {
             if (checkBox1.Checked)
             {
-                EnableDarkMode();
+                // EnableDarkMode();
+                this.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
+
             }
             else
             {
-                DisableDarkMode();
+                // DisableDarkMode();
+                this.BackColor = SystemColors.Control;
+
+            }
+        }
+        private void SaveDarkModeToConfig()
+        {
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
+            using (var writer = new StreamWriter("config.xml"))
+            {
+                var userSettings = new UserSettings
+                {
+                    UserSetting = trackBar1.Value,
+                    DarkMode = checkBox1.Checked
+                };
+                serializer.Serialize(writer, userSettings);
             }
         }
 
-        private void EnableDarkMode()
-        {
-            this.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
-        }
-
-        private void DisableDarkMode()
-        {
-            this.BackColor = SystemColors.Control;
-        }
         //
         // Trackbar
         //
@@ -153,6 +180,11 @@ namespace DimGlow
         }
 
         private void textBox1_TextChanged(object? sender, EventArgs e)
+        {
+            UpdateTransparency();
+        }
+
+        private void UpdateTransparency()
         {
             if (int.TryParse(textBox1.Text, out int value))
             {
