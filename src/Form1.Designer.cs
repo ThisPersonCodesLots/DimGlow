@@ -84,8 +84,6 @@
             // 
             notifyIcon1.Text = "DimGlow";
             notifyIcon1.Visible = true;
-            notifyIcon1.Icon = new System.Drawing.Icon("images\\icon.ico");
-
             // 
             // textBox1
             // 
@@ -121,6 +119,7 @@
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "DimGlow";
+            // Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)trackBar1).EndInit();
             ResumeLayout(false);
             PerformLayout();

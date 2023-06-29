@@ -1,70 +1,51 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DimGlow
 {
     public partial class Form1 : Form
     {
-        private OverlayForm overlayForm;
+        private List<OverlayForm> overlayForms;
+
         public Form1()
         {
             InitializeComponent();
-            InitializeOverlayForm();
+            InitializeOverlayForms();
 
             Text = "DimGlow";
-
-            textBox1.Text = trackBar1.Value.ToString();
             textBox1.TextChanged += textBox1_TextChanged;
 
             ShowInTaskbar = true;
-            notifyIcon1.Icon = new System.Drawing.Icon("images\\icon.ico");
+            notifyIcon1.Icon = new Icon("images\\icon.ico");
 
-            if (File.Exists("config.xml"))
-            {
-                LoadConfiguration();
-            }
-
+            LoadConfiguration();
             checkBox1.Checked = Properties.Settings.Default.DarkMode;
-
             UpdateDarkMode();
         }
 
-        private void InitializeOverlayForm()
+        private void InitializeOverlayForms()
         {
-            overlayForm = new OverlayForm
-            {
-                Visible = false
-            };
+            overlayForms = Screen.AllScreens.Select(screen => new OverlayForm { Bounds = screen.Bounds }).ToList();
         }
 
         private void ApplyDarkOverlay(int transparency)
         {
-            overlayForm.Opacity = transparency / 100.0;
-            overlayForm.Visible = true;
-        }
-        //
-        // Reset button
-        //
-        private void button1_Click(object sender, EventArgs e)
-        {
-            ResetForm();
+            foreach (var overlayForm in overlayForms)
+            {
+                overlayForm.Opacity = transparency / 100.0;
+                overlayForm.Visible = true;
+            }
         }
 
         private void ResetForm()
         {
             trackBar1.Value = trackBar1.Minimum;
             textBox1.Text = trackBar1.Value.ToString();
-            overlayForm.Visible = false;
             ApplyDarkOverlay(trackBar1.Value);
-        }
-        //
-        // Save button
-        //
-        private void button2_Click(object sender, EventArgs e)
-        {
-            SaveConfiguration();
         }
 
         private void SaveConfiguration()
@@ -80,98 +61,48 @@ namespace DimGlow
             var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
             using (var writer = new StreamWriter("config.xml"))
             {
-                var userSettings = new UserSettings
-                {
-                    UserSetting = trackBar1.Value,
-                    DarkMode = checkBox1.Checked
-                };
-                serializer.Serialize(writer, userSettings);
+                serializer.Serialize(writer, new UserSettings { UserSetting = trackBar1.Value, DarkMode = checkBox1.Checked });
             }
         }
 
         private void LoadConfiguration()
         {
-            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
-            using (var reader = new StreamReader("config.xml"))
+            if (File.Exists("config.xml"))
             {
-                var userSettings = (UserSettings)serializer.Deserialize(reader)!;
-                trackBar1.Value = userSettings.UserSetting;
-                textBox1.Text = trackBar1.Value.ToString();
-                ApplyDarkOverlay(trackBar1.Value);
-                checkBox1.Checked = userSettings.DarkMode;
-                // UpdateDarkMode(); // Update the dark mode immediately after loading the configuration
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
+                using (var reader = new StreamReader("config.xml"))
+                {
+                    var userSettings = (UserSettings)serializer.Deserialize(reader)!;
+                    trackBar1.Value = userSettings.UserSetting;
+                    textBox1.Text = trackBar1.Value.ToString();
+                    ApplyDarkOverlay(trackBar1.Value);
+                    checkBox1.Checked = userSettings.DarkMode;
+                }
             }
-        }
-        //
-        // Icon Tray button
-        //
-        private void button3_Click(object sender, EventArgs e)
-        {
-            MinimizeToTray();
         }
 
         private void MinimizeToTray()
         {
             notifyIcon1.Visible = true;
             notifyIcon1.DoubleClick += notifyIcon_DoubleClick;
-            this.ShowInTaskbar = false;
-            this.Hide();
-        }
-
-        void notifyIcon_DoubleClick(object? sender, EventArgs e)
-        {
-            RestoreFromTray();
+            ShowInTaskbar = false;
+            Hide();
         }
 
         private void RestoreFromTray()
         {
-            this.Show();
-            this.WindowState = FormWindowState.Normal;
-            this.ShowInTaskbar = true;
+            Show();
+            WindowState = FormWindowState.Normal;
+            ShowInTaskbar = true;
             notifyIcon1.Visible = false;
-        }
-        //
-        // Dark Mode
-        //
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            UpdateDarkMode();
-            // SaveDarkModeToConfig();
         }
 
         private void UpdateDarkMode()
         {
-            if (checkBox1.Checked)
-            {
-                // EnableDarkMode();
-                this.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
-
-            }
-            else
-            {
-                // DisableDarkMode();
-                this.BackColor = SystemColors.Control;
-
-            }
-        }
-        private void SaveDarkModeToConfig()
-        {
-            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
-            using (var writer = new StreamWriter("config.xml"))
-            {
-                var userSettings = new UserSettings
-                {
-                    UserSetting = trackBar1.Value,
-                    DarkMode = checkBox1.Checked
-                };
-                serializer.Serialize(writer, userSettings);
-            }
+            BackColor = checkBox1.Checked ? Color.FromArgb(64, 64, 64) : SystemColors.Control;
         }
 
-        //
-        // Trackbar
-        //
-        private void trackBar1_Scroll(object? sender, EventArgs e)
+        private void trackBar1_Scroll(object sender, EventArgs e)
         {
             if (sender == null) return;
             int transparency = trackBar1.Value;
@@ -179,27 +110,27 @@ namespace DimGlow
             textBox1.Text = trackBar1.Value.ToString();
         }
 
-        private void textBox1_TextChanged(object? sender, EventArgs e)
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            UpdateTransparency();
+            if (int.TryParse(textBox1.Text, out int value) && value >= trackBar1.Minimum && value <= trackBar1.Maximum)
+            {
+                trackBar1.Value = value;
+                ApplyDarkOverlay(value);
+            }
         }
 
-        private void UpdateTransparency()
-        {
-            if (int.TryParse(textBox1.Text, out int value))
-            {
-                if (textBox1.Text.Length > 2)
-                {
-                    textBox1.Text = textBox1.Text.Substring(0, 2);
-                    textBox1.Select(2, 0);
-                }
+        private void button1_Click(object sender, EventArgs e) => ResetForm();
 
-                if (value >= trackBar1.Minimum && value <= trackBar1.Maximum)
-                {
-                    trackBar1.Value = value;
-                    ApplyDarkOverlay(value);
-                }
-            }
+        private void button2_Click(object sender, EventArgs e) => SaveConfiguration();
+
+        private void button3_Click(object sender, EventArgs e) => MinimizeToTray();
+
+        void notifyIcon_DoubleClick(object? sender, EventArgs e) => RestoreFromTray();
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateDarkMode();
+            SaveConfiguration();
         }
     }
 
@@ -218,14 +149,14 @@ namespace DimGlow
         {
             InitializeComponent();
 
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.WindowState = FormWindowState.Maximized;
-            this.TopMost = true;
-            this.DoubleBuffered = true;
-            this.BackColor = Color.Black;
-            this.ShowInTaskbar = false;
-            this.Opacity = 0.1;
-            this.StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.None;
+            WindowState = FormWindowState.Maximized;
+            TopMost = true;
+            DoubleBuffered = true;
+            BackColor = Color.Black;
+            ShowInTaskbar = false;
+            Opacity = 0.1;
+            StartPosition = FormStartPosition.CenterScreen;
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
@@ -245,13 +176,12 @@ namespace DimGlow
 
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 261);
-            this.Name = "OverlayForm";
-            this.Text = "OverlayForm";
-            this.ResumeLayout(false);
+            SuspendLayout();
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(284, 261);
+            Name = "OverlayForm";
+            Text = "OverlayForm";
+            ResumeLayout(false);
         }
     }
 }
