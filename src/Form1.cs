@@ -15,10 +15,13 @@ namespace DimGlow
         {
             InitializeComponent();
             InitializeOverlayForms();
+            InitializeForm();
+        }
 
+        private void InitializeForm()
+        {
             Text = "DimGlow";
             textBox1.TextChanged += textBox1_TextChanged;
-
             ShowInTaskbar = true;
             notifyIcon1.Icon = new Icon("images\\icon.ico");
 
@@ -59,9 +62,26 @@ namespace DimGlow
         private void SaveConfigurationToFile()
         {
             var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
-            using (var writer = new StreamWriter("config.xml"))
+            const int maxRetryAttempts = 5;
+            const int retryDelayMs = 100;
+
+            for (int retry = 0; retry < maxRetryAttempts; retry++)
             {
-                serializer.Serialize(writer, new UserSettings { UserSetting = trackBar1.Value, DarkMode = checkBox1.Checked });
+                try
+                {
+                    using (var fileStream = new FileStream("config.xml", FileMode.Create, FileAccess.Write))
+                    {
+                        serializer.Serialize(fileStream, new UserSettings { UserSetting = trackBar1.Value, DarkMode = checkBox1.Checked });
+                    }
+
+                    // File saved successfully, break the retry loop
+                    break;
+                }
+                catch (IOException)
+                {
+                    // File is being used by another process, retry after delay
+                    System.Threading.Thread.Sleep(retryDelayMs);
+                }
             }
         }
 
@@ -70,7 +90,9 @@ namespace DimGlow
             if (File.Exists("config.xml"))
             {
                 var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
-                using (var reader = new StreamReader("config.xml"))
+
+                using (var fileStream = new FileStream("config.xml", FileMode.Open, FileAccess.Read))
+                using (var reader = new StreamReader(fileStream))
                 {
                     var userSettings = (UserSettings)serializer.Deserialize(reader)!;
                     trackBar1.Value = userSettings.UserSetting;
@@ -148,7 +170,11 @@ namespace DimGlow
         public OverlayForm()
         {
             InitializeComponent();
+            InitializeOverlayForm();
+        }
 
+        private void InitializeOverlayForm()
+        {
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
             TopMost = true;
