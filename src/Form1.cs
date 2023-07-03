@@ -10,12 +10,20 @@ namespace DimGlow
     public partial class Form1 : Form
     {
         private List<OverlayForm> overlayForms;
+        private System.Windows.Forms.Timer batteryTimer;
 
         public Form1()
         {
             InitializeComponent();
             InitializeOverlayForms();
             InitializeForm();
+            UpdateBatteryStatus();
+            
+            // Create and start the battery timer
+            batteryTimer = new System.Windows.Forms.Timer();
+            batteryTimer.Interval = 5000; // Update every 5 seconds
+            batteryTimer.Tick += BatteryTimer_Tick;
+            batteryTimer.Start();
         }
 
         private void InitializeForm()
@@ -43,6 +51,47 @@ namespace DimGlow
                 overlayForm.Visible = true;
             }
         }
+        
+        private void UpdateBatteryStatus()
+        {
+            PowerStatus powerStatus = SystemInformation.PowerStatus;
+            // Check if the laptop is currenty running on battery power
+            bool isBatteryPower= powerStatus.PowerLineStatus == PowerLineStatus.Offline;
+            
+            if (isBatteryPower)
+            {
+                float batteryPercentage = powerStatus.BatteryLifePercent * 100;
+                DrawPictureTextOnTaskbar($"{batteryPercentage:0}%", Color.Green);
+            }
+            else
+            {
+                DrawPictureTextOnTaskbar(":d", Color.Yellow);
+            }
+        }
+        
+        private void BatteryTimer_Tick(object sender, EventArgs e)
+        {
+            UpdateBatteryStatus();
+        }
+
+        private void DrawPictureTextOnTaskbar(string text, Color textColor)
+        {
+            // font & size
+            string fontName = "Arial";
+            float fontSize = 10;
+            
+            using (Font font = new Font(fontName, fontSize, FontStyle.Bold))
+            using (Image image = new Bitmap(16, 16))
+            using (Graphics graphics = Graphics.FromImage(image))
+            {
+                graphics.Clear(Color.Transparent);
+                graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                graphics.DrawString(text, font, new SolidBrush(textColor), new PointF(0, 0));
+                IntPtr hIcon = ((Bitmap)image).GetHicon();
+                Icon icon = Icon.FromHandle(hIcon);
+                notifyIcon1.Icon = icon;
+            }
+        }
 
         private void ResetForm()
         {
@@ -57,6 +106,8 @@ namespace DimGlow
             Properties.Settings.Default.DarkMode = checkBox1.Checked;
             Properties.Settings.Default.Save();
             SaveConfigurationToFile();
+            
+            UpdateBatteryStatus();
         }
 
         private void SaveConfigurationToFile()
@@ -126,7 +177,7 @@ namespace DimGlow
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            if (sender == null) return;
+            //            if (sender == null) return;
             int transparency = trackBar1.Value;
             ApplyDarkOverlay(transparency);
             textBox1.Text = trackBar1.Value.ToString();
@@ -154,6 +205,7 @@ namespace DimGlow
             UpdateDarkMode();
             SaveConfiguration();
         }
+
     }
 
     public class UserSettings

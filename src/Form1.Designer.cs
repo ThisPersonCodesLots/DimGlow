@@ -36,6 +36,7 @@
             notifyIcon1 = new NotifyIcon(components);
             textBox1 = new TextBox();
             checkBox1 = new CheckBox();
+            notifyIcon2 = new NotifyIcon(components);
             ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
             SuspendLayout();
             // 
@@ -119,7 +120,6 @@
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "DimGlow";
-            // Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)trackBar1).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -134,5 +134,6 @@
         private NotifyIcon notifyIcon1;
         private TextBox textBox1;
         private CheckBox checkBox1;
+        private NotifyIcon notifyIcon2;
     }
 }

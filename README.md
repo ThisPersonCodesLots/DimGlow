@@ -17,8 +17,8 @@
 
 ### TODO:
 - [ ] Solve the issue with the application triggering Windows Defender SmartScreen.
-- [ ] Solve the issue with "Dark Mode" checkbox to remain saved when the application is closed.
-- [ ] Add a "Start with Windows" checkbox.
+- [x] Solve the issue with "Dark Mode" checkbox to remain saved when the application is closed.
+- [x] Show battery status.
 - [x] Multi-monitor support.
 - [ ] Multi-monitor separate functionality.
 
