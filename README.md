@@ -14,6 +14,8 @@
 
 - If you don't trust me, you can build the application yourself using Visual Studio.
 
+-  The executable file will be located in the bin folder of the project directory. Just move the entire /src files in the main directory and run *DimGlow.sl*
+
 ### TODO:
 - [ ] Solve the issue with the application triggering Windows Defender SmartScreen.
 - [x] Solve the issue with "Dark Mode" checkbox to remain saved when the application is closed.
@@ -30,7 +32,7 @@
 
 
 ### Behind the scenes
-- This project was built using Visual Studio 2022. To run the application, open the solution file in Visual Studio and build the project. The executable file will be located in the bin folder of the project directory. Just move the entire /src files in the main directory and run *DimGlow.sl*
+- This project was built using Visual Studio 2022. To run the application, open the solution file in Visual Studio and build the project.
 
 - It's used primarily for reducing eye strain when using a laptop screen in dark environments (e.g. in bed, on a plane, etc.).
 
