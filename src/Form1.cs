@@ -18,8 +18,8 @@ namespace DimGlow
             InitializeOverlayForms();
             InitializeForm();
             UpdateBatteryStatus();
-            
-            // Create and start the battery timer
+
+// Create and start the battery timer
             batteryTimer = new System.Windows.Forms.Timer();
             batteryTimer.Interval = 5000; // Update every 5 seconds
             batteryTimer.Tick += BatteryTimer_Tick;
@@ -51,13 +51,13 @@ namespace DimGlow
                 overlayForm.Visible = true;
             }
         }
-        
+
         private void UpdateBatteryStatus()
         {
             PowerStatus powerStatus = SystemInformation.PowerStatus;
             // Check if the laptop is currenty running on battery power
-            bool isBatteryPower= powerStatus.PowerLineStatus == PowerLineStatus.Offline;
-            
+            bool isBatteryPower = powerStatus.PowerLineStatus == PowerLineStatus.Offline;
+
             if (isBatteryPower)
             {
                 float batteryPercentage = powerStatus.BatteryLifePercent * 100;
@@ -68,7 +68,7 @@ namespace DimGlow
                 DrawPictureTextOnTaskbar(":d", Color.Yellow);
             }
         }
-        
+
         private void BatteryTimer_Tick(object sender, EventArgs e)
         {
             UpdateBatteryStatus();
@@ -79,7 +79,7 @@ namespace DimGlow
             // font & size
             string fontName = "Arial";
             float fontSize = 10;
-            
+
             using (Font font = new Font(fontName, fontSize, FontStyle.Bold))
             using (Image image = new Bitmap(16, 16))
             using (Graphics graphics = Graphics.FromImage(image))
@@ -106,7 +106,7 @@ namespace DimGlow
             Properties.Settings.Default.DarkMode = checkBox1.Checked;
             Properties.Settings.Default.Save();
             SaveConfigurationToFile();
-            
+
             UpdateBatteryStatus();
         }
 
@@ -122,7 +122,8 @@ namespace DimGlow
                 {
                     using (var fileStream = new FileStream("config.xml", FileMode.Create, FileAccess.Write))
                     {
-                        serializer.Serialize(fileStream, new UserSettings { UserSetting = trackBar1.Value, DarkMode = checkBox1.Checked });
+                        serializer.Serialize(fileStream,
+                            new UserSettings { UserSetting = trackBar1.Value, DarkMode = checkBox1.Checked });
                     }
 
                     // File saved successfully, break the retry loop
@@ -205,7 +206,6 @@ namespace DimGlow
             UpdateDarkMode();
             SaveConfiguration();
         }
-
     }
 
     public class UserSettings
