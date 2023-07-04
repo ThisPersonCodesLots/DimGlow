@@ -21,7 +21,7 @@ namespace DimGlow
 
 // Create and start the battery timer
             batteryTimer = new System.Windows.Forms.Timer();
-            batteryTimer.Interval = 5000; // Update every 5 seconds
+            batteryTimer.Interval = 15000; // Update every 15 seconds
             batteryTimer.Tick += BatteryTimer_Tick;
             batteryTimer.Start();
         }
@@ -61,11 +61,11 @@ namespace DimGlow
             if (isBatteryPower)
             {
                 float batteryPercentage = powerStatus.BatteryLifePercent * 100;
-                DrawPictureTextOnTaskbar($"{batteryPercentage:0}%", Color.Green);
+                DrawPictureTextOnTaskbar($"{batteryPercentage:0}", Color.Green);
             }
             else
             {
-                DrawPictureTextOnTaskbar(":d", Color.Yellow);
+                DrawPictureTextOnTaskbar("X", Color.Red);
             }
         }
 
@@ -77,11 +77,15 @@ namespace DimGlow
         private void DrawPictureTextOnTaskbar(string text, Color textColor)
         {
             // font & size
-            string fontName = "Arial";
-            float fontSize = 10;
+            string fontName = "Segoe UI";
+            float fontSize = 38;
+            
+            // image
+            int imageWidth = 64;
+            int imageHeight = 64;
 
             using (Font font = new Font(fontName, fontSize, FontStyle.Bold))
-            using (Image image = new Bitmap(16, 16))
+            using (Image image = new Bitmap(imageWidth, imageHeight))
             using (Graphics graphics = Graphics.FromImage(image))
             {
                 graphics.Clear(Color.Transparent);
@@ -99,62 +103,7 @@ namespace DimGlow
             textBox1.Text = trackBar1.Value.ToString();
             ApplyDarkOverlay(trackBar1.Value);
         }
-
-        private void SaveConfiguration()
-        {
-            Properties.Settings.Default.User_Setting = trackBar1.Value;
-            Properties.Settings.Default.DarkMode = checkBox1.Checked;
-            Properties.Settings.Default.Save();
-            SaveConfigurationToFile();
-
-            UpdateBatteryStatus();
-        }
-
-        private void SaveConfigurationToFile()
-        {
-            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
-            const int maxRetryAttempts = 5;
-            const int retryDelayMs = 100;
-
-            for (int retry = 0; retry < maxRetryAttempts; retry++)
-            {
-                try
-                {
-                    using (var fileStream = new FileStream("config.xml", FileMode.Create, FileAccess.Write))
-                    {
-                        serializer.Serialize(fileStream,
-                            new UserSettings { UserSetting = trackBar1.Value, DarkMode = checkBox1.Checked });
-                    }
-
-                    // File saved successfully, break the retry loop
-                    break;
-                }
-                catch (IOException)
-                {
-                    // File is being used by another process, retry after delay
-                    System.Threading.Thread.Sleep(retryDelayMs);
-                }
-            }
-        }
-
-        private void LoadConfiguration()
-        {
-            if (File.Exists("config.xml"))
-            {
-                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
-
-                using (var fileStream = new FileStream("config.xml", FileMode.Open, FileAccess.Read))
-                using (var reader = new StreamReader(fileStream))
-                {
-                    var userSettings = (UserSettings)serializer.Deserialize(reader)!;
-                    trackBar1.Value = userSettings.UserSetting;
-                    textBox1.Text = trackBar1.Value.ToString();
-                    ApplyDarkOverlay(trackBar1.Value);
-                    checkBox1.Checked = userSettings.DarkMode;
-                }
-            }
-        }
-
+        
         private void MinimizeToTray()
         {
             notifyIcon1.Visible = true;
@@ -206,12 +155,6 @@ namespace DimGlow
             UpdateDarkMode();
             SaveConfiguration();
         }
-    }
-
-    public class UserSettings
-    {
-        public int UserSetting { get; set; }
-        public bool DarkMode { get; set; }
     }
 
     public class OverlayForm : Form
